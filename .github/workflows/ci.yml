@@ -1,36 +1,51 @@
-name: Node.js CI Pipeline
+name: Node.js CI/CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+  # Optional Deployment Step
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy (customize this step)
+        run: echo "Deploying your app..."
+        # Replace with your actual deployment logic
+
+
     
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    # Set up Node.js
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '14'  # You can change this to the version you need
-
-    # Install dependencies
-    - name: Install dependencies
-      run: npm install
-
-    # Run tests
-    - name: Run tests
-      run: npm test
-
-    # Optionally deploy if you have a deploy step (for example, on success)
-    - name: Deploy (optional)
-      run: echo "Deploy your app here!"
